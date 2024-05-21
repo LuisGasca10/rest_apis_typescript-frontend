@@ -1,4 +1,3 @@
-import { boolean, coerce, number, parse, safeParse } from "valibot";
 import {
   DraftProductSchema,
   ProductSchema,
@@ -7,6 +6,7 @@ import {
 } from "../types";
 import axios from "axios";
 import { toBoolea } from "../utils";
+import * as v from "valibot";
 
 type ProductData = {
   [k: string]: FormDataEntryValue;
@@ -14,7 +14,7 @@ type ProductData = {
 
 export async function addProduct(data: ProductData) {
   try {
-    const result = safeParse(DraftProductSchema, {
+    const result = v.safeParse(DraftProductSchema, {
       name: data.name,
       price: +data.price,
     });
@@ -37,7 +37,7 @@ export async function getProducts() {
   try {
     const url = `${import.meta.env.VITE_API_URL}/api/products`;
     const { data } = await axios(url);
-    const result = safeParse(ProductsSchema, data.data);
+    const result = v.safeParse(ProductsSchema, data.data);
     if (result.success) {
       return result.output;
     } else {
@@ -52,7 +52,7 @@ export async function getProductById(id: Product["id"]) {
   try {
     const url = `${import.meta.env.VITE_API_URL}/api/products/${id}`;
     const { data } = await axios(url);
-    const result = safeParse(ProductSchema, data.data);
+    const result = v.safeParse(ProductSchema, data.data);
 
     if (result.success) {
       return result.output;
@@ -66,13 +66,13 @@ export async function getProductById(id: Product["id"]) {
 
 export async function updateProduct(data: ProductData, id: Product["id"]) {
   try {
-    const NumberSchema = coerce(number(), Number);
+    const NumberSchema = v.coerce(v.number(), Number);
 
     console.log({ id, ...data });
-    const result = safeParse(ProductSchema, {
+    const result = v.safeParse(ProductSchema, {
       id,
       name: data.name,
-      price: parse(NumberSchema, data.price),
+      price: v.parse(NumberSchema, data.price),
       availability: toBoolea(data.availability.toString()),
     });
 
